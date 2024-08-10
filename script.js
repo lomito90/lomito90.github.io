@@ -37,9 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const generatedKeysTitle = document.getElementById('generatedKeysTitle');
     const gameSelect = document.getElementById('gameSelect');
     const copyStatus = document.getElementById('copyStatus');
-    const sourceCode = document.getElementById('sourceCode');
     const gameSelectGroup = document.getElementById('gameSelectGroup');
     const keyCountGroup = document.getElementById('keyCountGroup');
+    const generateMoreBtn = document.getElementById('generateMoreBtn');
+    const supportBtn = document.getElementById('supportBtn');
 
     startBtn.addEventListener('click', async () => {
         const gameChoice = parseInt(gameSelect.value);
@@ -113,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`
             ).join('');
             copyAllBtn.classList.remove('hidden');
-        } else if (keys.length === 1) {
+        } else if (keys.length === 1 && keys[0]) {
             keysList.innerHTML =
                 `<div class="key-item">
                     <input type="text" value="${keys[0]}" readonly>
@@ -126,88 +127,23 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.copyKeyBtn').forEach(button => {
             button.addEventListener('click', (event) => {
                 const key = event.target.getAttribute('data-key');
-                
-                // Check if navigator.clipboard is available
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(key).then(() => {
-                        copyStatus.classList.remove('hidden');
-                        setTimeout(() => copyStatus.classList.add('hidden'), 2000);
-                    }).catch(err => {
-                        console.error('Failed to copy text: ', err);
-                    });
-                } else {
-                    // Fallback method for non-HTTPS environments
-                    const textArea = document.createElement('textarea');
-                    textArea.value = key;
-                    textArea.style.position = 'fixed';  // Avoid scrolling to bottom of page
-                    textArea.style.top = '0';
-                    textArea.style.left = '0';
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-
-                    try {
-                        const successful = document.execCommand('copy');
-                        const msg = successful ? 'successful' : 'unsuccessful';
-                        console.log('Fallback: Copying text command was ' + msg);
-                        if (successful) {
-                            copyStatus.classList.remove('hidden');
-                            setTimeout(() => copyStatus.classList.add('hidden'), 2000);
-                        }
-                    } catch (err) {
-                        console.error('Fallback: Oops, unable to copy', err);
-                    }
-
-                    document.body.removeChild(textArea);
-                }
+                copyToClipboard(key);
             });
         });
         copyAllBtn.addEventListener('click', () => {
             const keysText = keys.filter(key => key).join('\n');
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(keysText).then(() => {
-                    copyStatus.classList.remove('hidden');
-                    setTimeout(() => copyStatus.classList.add('hidden'), 2000);
-                }).catch(err => {
-                    console.error('Failed to copy text: ', err);
-                });
-            } else {
-                const textArea = document.createElement('textarea');
-                textArea.value = keysText;
-                textArea.style.position = 'fixed';  // Avoid scrolling to bottom of page
-                textArea.style.top = '0';
-                textArea.style.left = '0';
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-
-                try {
-                    const successful = document.execCommand('copy');
-                    const msg = successful ? 'successful' : 'unsuccessful';
-                    console.log('Fallback: Copying text command was ' + msg);
-                    if (successful) {
-                        copyStatus.classList.remove('hidden');
-                        setTimeout(() => copyStatus.classList.add('hidden'), 2000);
-                    }
-                } catch (err) {
-                    console.error('Fallback: Oops, unable to copy', err);
-                }
-
-                document.body.removeChild(textArea);
-            }
+            copyToClipboard(keysText);
         });
 
         progressBar.style.width = '100%';
         progressText.innerText = '100%';
         progressLog.innerText = 'Complete';
 
-        startBtn.classList.remove('hidden');
-        keyCountSelect.classList.remove('hidden');
-        gameSelect.classList.remove('hidden');
+        generateMoreBtn.classList.remove('hidden');
         startBtn.disabled = false;
     });
 
-    document.getElementById('generateMoreBtn').addEventListener('click', () => {
+    generateMoreBtn.addEventListener('click', () => {
         progressContainer.classList.add('hidden');
         keyContainer.classList.add('hidden');
         startBtn.classList.remove('hidden');
@@ -215,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameSelect.classList.remove('hidden');
         generatedKeysTitle.classList.add('hidden');
         copyAllBtn.classList.add('hidden');
+        generateMoreBtn.classList.add('hidden');
         keysList.innerHTML = '';
         keyCountLabel.innerText = 'Number of keys:';
         
@@ -223,8 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
         keyCountGroup.style.display = 'block';
     });
 
-    sourceCode.addEventListener('click', () => {
-        window.open('https://github.com/ShafiqSadat/HamsterKeyGenWeb', '_blank');
+    supportBtn.addEventListener('click', () => {
+        window.open('https://t.me/hoofik', '_blank');
     });
 
     const generateClientId = () => {
@@ -306,4 +243,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
     const delayRandom = () => Math.random() / 3 + 1;
+
+    const copyToClipboard = (text) => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyStatus();
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        } else {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopyStatus();
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+
+            document.body.removeChild(textArea);
+        }
+    };
+
+    const showCopyStatus = () => {
+        copyStatus.classList.remove('hidden');
+        setTimeout(() => copyStatus.classList.add('hidden'), 2000);
+    };
 });
