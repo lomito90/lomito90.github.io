@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamster Key Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <img src="Logo.png" alt="Hamster Logo" class="hamster-logo">
+        <h1>Hamster Key Generator</h1>
+
+        <div id="formContainer">
+            <div id="gameSelectGroup" class="form-group">
+                <label for="gameSelect">Select Game:</label>
+                <select id="gameSelect">
+                    <option value="1">Riding Extreme 3D</option>
+                    <option value="2">Chain Cube 2048</option>
+                    <option value="3">My Clone Army</option>
+                    <option value="4">Train Miner</option>
+                </select>
+            </div>
+
+            <div id="keyCountGroup" class="form-group">
+                <label for="keyCountSelect">Select Number of Keys:</label>
+                <select id="keyCountSelect">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+
+            <button id="startBtn">Generate Keys</button>
+        </div>
+
+        <div id="progressContainer" class="hidden">
+            <div class="progress-bar">
+                <div id="progressBar"></div>
+            </div>
+            <p id="progressText">0%</p>
+            <p id="progressLog">Starting...</p>
+        </div>
+
+        <div id="keyContainer" class="hidden">
+            <h2 id="generatedKeysTitle" class="hidden">Generated Keys</h2>
+            <div id="keysList"></div>
+            <button id="copyAllBtn" class="hidden">Copy All Keys</button>
+        </div>
+
+        <p id="keyCountLabel">Number of keys:</p>
+        <button id="generateMoreBtn" class="hidden">Generate More Keys</button>
+        <p id="copyStatus" class="hidden">Keys copied to clipboard!</p>
+
+        <div class="footer">
+            <p>Disclaimer: Please don't abuse it. Also, if you have any problems, change your IP address or change your VPN server and try again. 
+Tap the support button below if you have any issues</p>
+            <button id="supportBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Support
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
