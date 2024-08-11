@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameSelectGroup = document.getElementById('gameSelectGroup');
     const keyCountGroup = document.getElementById('keyCountGroup');
     const supportBtn = document.getElementById('supportBtn');
+    const chatId = new URLSearchParams(window.location.search).get('chatId');
 
     // Extract chat_id from URL
     const chatId = window.location.pathname.split('/').pop();
