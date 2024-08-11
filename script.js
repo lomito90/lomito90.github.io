@@ -34,10 +34,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameSelectGroup = document.getElementById('gameSelectGroup');
     const keyCountGroup = document.getElementById('keyCountGroup');
     const supportBtn = document.getElementById('supportBtn');
-    const chatId = new URLSearchParams(window.location.search).get('chatId');
+    const keyContainer = document.getElementById('keyContainer');
+    const keysList = document.getElementById('keysList');
+    const copyAllBtn = document.getElementById('copyAllBtn');
+    const copyStatus = document.getElementById('copyStatus');
 
     // Extract chat_id from URL
-    const chatId = window.location.pathname.split('/').pop();
+    const urlParams = new URLSearchParams(window.location.search);
+    const chatId = urlParams.get('chatId');
+    console.log('Chat ID:', chatId);  // For debugging
+
+    if (!chatId) {
+        alert('No chat ID provided. Please make sure you're using the correct link.');
+        return;
+    }
 
     startBtn.addEventListener('click', async () => {
         const gameChoice = parseInt(gameSelect.value);
@@ -102,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await sendKeysToServer(chatId, validKeys);
                 updateProgress(100 - progress, 'Keys sent to server');
                 alert('Keys have been generated and sent to the bot. Check your Telegram messages.');
+                displayGeneratedKeys(validKeys);
             } catch (error) {
                 alert(`Failed to send keys to server: ${error.message}`);
             }
@@ -121,6 +132,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     supportBtn.addEventListener('click', () => {
         window.open('https://t.me/hoofik', '_blank');
+    });
+
+    copyAllBtn.addEventListener('click', () => {
+        const keyInputs = document.querySelectorAll('.key-input');
+        const keys = Array.from(keyInputs).map(input => input.value).join('\n');
+        navigator.clipboard.writeText(keys).then(() => {
+            copyStatus.classList.remove('hidden');
+            setTimeout(() => copyStatus.classList.add('hidden'), 3000);
+        });
     });
 
     const generateClientId = () => {
@@ -192,17 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return data.promoCode;
     };
 
-    const generateUUID = () => {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    };
-
-    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-    const delayRandom = () => Math.random() / 3 + 1;
-
     const sendKeysToServer = async (chatId, keys) => {
         const response = await fetch('https://ether.lunarnodes.xyz:1263/send-keys', {
             method: 'POST',
@@ -219,4 +228,40 @@ document.addEventListener('DOMContentLoaded', () => {
             throw new Error('Failed to send keys to server');
         }
     };
+
+    const displayGeneratedKeys = (keys) => {
+        keysList.innerHTML = '';
+        keys.forEach((key, index) => {
+            const keyItem = document.createElement('div');
+            keyItem.className = 'key-item';
+            keyItem.innerHTML = `
+                <input type="text" class="key-input" value="${key}" readonly>
+                <button class="copyKeyBtn" data-index="${index}">Copy</button>
+            `;
+            keysList.appendChild(keyItem);
+        });
+        keyContainer.classList.remove('hidden');
+
+        document.querySelectorAll('.copyKeyBtn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = e.target.getAttribute('data-index');
+                const input = document.querySelectorAll('.key-input')[index];
+                input.select();
+                document.execCommand('copy');
+                e.target.textContent = 'Copied!';
+                setTimeout(() => e.target.textContent = 'Copy', 2000);
+            });
+        });
+    };
+
+    const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    };
+
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    const delayRandom = () => Math.random() / 3 + 1;
 });
