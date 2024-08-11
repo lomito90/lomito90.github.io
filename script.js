@@ -26,28 +26,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const startBtn = document.getElementById('startBtn');
     const keyCountSelect = document.getElementById('keyCountSelect');
+    const keyCountLabel = document.getElementById('keyCountLabel');
     const progressContainer = document.getElementById('progressContainer');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
     const progressLog = document.getElementById('progressLog');
-    const gameSelect = document.getElementById('gameSelect');
-    const gameSelectGroup = document.getElementById('gameSelectGroup');
-    const keyCountGroup = document.getElementById('keyCountGroup');
-    const supportBtn = document.getElementById('supportBtn');
     const keyContainer = document.getElementById('keyContainer');
     const keysList = document.getElementById('keysList');
     const copyAllBtn = document.getElementById('copyAllBtn');
+    const generatedKeysTitle = document.getElementById('generatedKeysTitle');
+    const gameSelect = document.getElementById('gameSelect');
     const copyStatus = document.getElementById('copyStatus');
-
-    // Extract chat_id from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const chatId = urlParams.get('chatId');
-    console.log('Chat ID:', chatId);  // For debugging
-
-    if (!chatId) {
-        alert('No chat ID provided. Please make sure you're using the correct link.');
-        return;
-    }
+    const gameSelectGroup = document.getElementById('gameSelectGroup');
+    const keyCountGroup = document.getElementById('keyCountGroup');
+    const generateMoreBtn = document.getElementById('generateMoreBtn');
+    const supportBtn = document.getElementById('supportBtn');
 
     startBtn.addEventListener('click', async () => {
         const gameChoice = parseInt(gameSelect.value);
@@ -58,11 +51,19 @@ document.addEventListener('DOMContentLoaded', () => {
         gameSelectGroup.style.display = 'none';
         keyCountGroup.style.display = 'none';
 
+        keyCountLabel.innerText = `Number of keys: ${keyCount}`;
+
         progressBar.style.width = '0%';
         progressText.innerText = '0%';
         progressLog.innerText = 'Starting...';
         progressContainer.classList.remove('hidden');
+        keyContainer.classList.add('hidden');
+        generatedKeysTitle.classList.add('hidden');
+        keysList.innerHTML = '';
+        keyCountSelect.classList.add('hidden');
+        gameSelect.classList.add('hidden');
         startBtn.classList.add('hidden');
+        copyAllBtn.classList.add('hidden');
         startBtn.disabled = true;
 
         let progress = 0;
@@ -105,42 +106,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const keys = await Promise.all(Array.from({ length: keyCount }, generateKeyProcess));
 
-        // Send keys to Python server
-        const validKeys = keys.filter(key => key);
-        if (validKeys.length > 0) {
-            try {
-                await sendKeysToServer(chatId, validKeys);
-                updateProgress(100 - progress, 'Keys sent to server');
-                alert('Keys have been generated and sent to the bot. Check your Telegram messages.');
-                displayGeneratedKeys(validKeys);
-            } catch (error) {
-                alert(`Failed to send keys to server: ${error.message}`);
-            }
-        } else {
-            alert('Failed to generate any valid keys.');
+        if (keys.length > 1) {
+            keysList.innerHTML = keys.filter(key => key).map(key =>
+                `<div class="key-item">
+                    <input type="text" value="${key}" readonly>
+                    <button class="copyKeyBtn" data-key="${key}">Copy Key</button>
+                </div>`
+            ).join('');
+            copyAllBtn.classList.remove('hidden');
+        } else if (keys.length === 1 && keys[0]) {
+            keysList.innerHTML =
+                `<div class="key-item">
+                    <input type="text" value="${keys[0]}" readonly>
+                    <button class="copyKeyBtn" data-key="${keys[0]}">Copy Key</button>
+                </div>`;
         }
+
+        keyContainer.classList.remove('hidden');
+        generatedKeysTitle.classList.remove('hidden');
+        document.querySelectorAll('.copyKeyBtn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const key = event.target.getAttribute('data-key');
+                copyToClipboard(key);
+            });
+        });
+        copyAllBtn.addEventListener('click', () => {
+            const keysText = keys.filter(key => key).join('\n');
+            copyToClipboard(keysText);
+        });
 
         progressBar.style.width = '100%';
         progressText.innerText = '100%';
         progressLog.innerText = 'Complete';
 
+        generateMoreBtn.classList.remove('hidden');
         startBtn.disabled = false;
+    });
+
+    generateMoreBtn.addEventListener('click', () => {
+        progressContainer.classList.add('hidden');
+        keyContainer.classList.add('hidden');
         startBtn.classList.remove('hidden');
+        keyCountSelect.classList.remove('hidden');
+        gameSelect.classList.remove('hidden');
+        generatedKeysTitle.classList.add('hidden');
+        copyAllBtn.classList.add('hidden');
+        generateMoreBtn.classList.add('hidden');
+        keysList.innerHTML = '';
+        keyCountLabel.innerText = 'Number of keys:';
+        
+        // Show the form sections again
         gameSelectGroup.style.display = 'block';
         keyCountGroup.style.display = 'block';
     });
 
     supportBtn.addEventListener('click', () => {
         window.open('https://t.me/hoofik', '_blank');
-    });
-
-    copyAllBtn.addEventListener('click', () => {
-        const keyInputs = document.querySelectorAll('.key-input');
-        const keys = Array.from(keyInputs).map(input => input.value).join('\n');
-        navigator.clipboard.writeText(keys).then(() => {
-            copyStatus.classList.remove('hidden');
-            setTimeout(() => copyStatus.classList.add('hidden'), 3000);
-        });
     });
 
     const generateClientId = () => {
@@ -212,48 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return data.promoCode;
     };
 
-    const sendKeysToServer = async (chatId, keys) => {
-        const response = await fetch('https://ether.lunarnodes.xyz:1263/send-keys', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chatId,
-                keys
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to send keys to server');
-        }
-    };
-
-    const displayGeneratedKeys = (keys) => {
-        keysList.innerHTML = '';
-        keys.forEach((key, index) => {
-            const keyItem = document.createElement('div');
-            keyItem.className = 'key-item';
-            keyItem.innerHTML = `
-                <input type="text" class="key-input" value="${key}" readonly>
-                <button class="copyKeyBtn" data-index="${index}">Copy</button>
-            `;
-            keysList.appendChild(keyItem);
-        });
-        keyContainer.classList.remove('hidden');
-
-        document.querySelectorAll('.copyKeyBtn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = e.target.getAttribute('data-index');
-                const input = document.querySelectorAll('.key-input')[index];
-                input.select();
-                document.execCommand('copy');
-                e.target.textContent = 'Copied!';
-                setTimeout(() => e.target.textContent = 'Copy', 2000);
-            });
-        });
-    };
-
     const generateUUID = () => {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -264,4 +243,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
     const delayRandom = () => Math.random() / 3 + 1;
+
+    const copyToClipboard = (text) => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyStatus();
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        } else {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopyStatus();
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+
+            document.body.removeChild(textArea);
+        }
+    };
+
+    const showCopyStatus = () => {
+        copyStatus.classList.remove('hidden');
+        setTimeout(() => copyStatus.classList.add('hidden'), 2000);
+    };
 });
