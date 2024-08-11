@@ -1,6 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const EVENTS_DELAY = 20000;
     const TELEGRAM_BOT_TOKEN = '7230408857:AAFiBAIdDBcyNg4-jNOwIVHaWKs11Venl4k';
+    const MTPROTO_PROXY = {
+        server: '95.169.173.163',
+        port: '777',
+        secret: '79ea54d21249bd7ac519CQ'
+    };
 
     const games = {
         1: {
@@ -32,12 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
     const progressLog = document.getElementById('progressLog');
-    const keyContainer = document.getElementById('keyContainer');
-    const keysList = document.getElementById('keysList');
-    const copyAllBtn = document.getElementById('copyAllBtn');
-    const generatedKeysTitle = document.getElementById('generatedKeysTitle');
     const gameSelect = document.getElementById('gameSelect');
-    const copyStatus = document.getElementById('copyStatus');
     const gameSelectGroup = document.getElementById('gameSelectGroup');
     const keyCountGroup = document.getElementById('keyCountGroup');
     const generateMoreBtn = document.getElementById('generateMoreBtn');
@@ -66,13 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
         progressText.innerText = '0%';
         progressLog.innerText = 'Starting...';
         progressContainer.classList.remove('hidden');
-        keyContainer.classList.add('hidden');
-        generatedKeysTitle.classList.add('hidden');
-        keysList.innerHTML = '';
         keyCountSelect.classList.add('hidden');
         gameSelect.classList.add('hidden');
         startBtn.classList.add('hidden');
-        copyAllBtn.classList.add('hidden');
         startBtn.disabled = true;
 
         let progress = 0;
@@ -115,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const keys = await Promise.all(Array.from({ length: keyCount }, generateKeyProcess));
 
-        // Instead of displaying keys, send them via Telegram
         if (keys.length > 0) {
             const validKeys = keys.filter(key => key);
             const message = `Generated keys for ${game.name}:\n\n${validKeys.join('\n')}`;
@@ -138,14 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     generateMoreBtn.addEventListener('click', () => {
         progressContainer.classList.add('hidden');
-        keyContainer.classList.add('hidden');
         startBtn.classList.remove('hidden');
         keyCountSelect.classList.remove('hidden');
         gameSelect.classList.remove('hidden');
-        generatedKeysTitle.classList.add('hidden');
-        copyAllBtn.classList.add('hidden');
         generateMoreBtn.classList.add('hidden');
-        keysList.innerHTML = '';
         keyCountLabel.innerText = 'Number of keys:';
         
         // Show the form sections again
@@ -238,22 +229,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const delayRandom = () => Math.random() / 3 + 1;
 
     const sendTelegramMessage = async (chatId, text) => {
-        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                chat_id: chatId,
-                text: text,
-            }),
-        });
+        const proxyUrl = `https://${MTPROTO_PROXY.server}:${MTPROTO_PROXY.port}/${MTPROTO_PROXY.secret}/api.telegram.org`;
+        const url = `${proxyUrl}/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: text,
+                }),
+            });
 
-        if (!response.ok) {
-            throw new Error('Failed to send Telegram message');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Message sent successfully:', result);
+            return result;
+        } catch (error) {
+            console.error('Failed to send Telegram message:', error);
+            throw error;
         }
-
-        return await response.json();
     };
 });
