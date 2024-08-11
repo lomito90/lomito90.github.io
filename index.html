@@ -10,7 +10,7 @@
     <div class="container">
         <img src="Logo.png" alt="Hamster Logo" class="hamster-logo">
         <h1>Hamster Key Generator</h1>
-
+        
         <div id="formContainer">
             <div id="gameSelectGroup" class="form-group">
                 <label for="gameSelect">Select Game:</label>
@@ -21,7 +21,7 @@
                     <option value="4">Train Miner</option>
                 </select>
             </div>
-
+            
             <div id="keyCountGroup" class="form-group">
                 <label for="keyCountSelect">Select Number of Keys:</label>
                 <select id="keyCountSelect">
@@ -37,10 +37,10 @@
                     <option value="10">10</option>
                 </select>
             </div>
-
+            
             <button id="startBtn">Generate Keys</button>
         </div>
-
+        
         <div id="progressContainer" class="hidden">
             <div class="progress-bar">
                 <div id="progressBar"></div>
@@ -48,20 +48,11 @@
             <p id="progressText">0%</p>
             <p id="progressLog">Starting...</p>
         </div>
-
-        <div id="keyContainer" class="hidden">
-            <h2 id="generatedKeysTitle" class="hidden">Generated Keys</h2>
-            <div id="keysList"></div>
-            <button id="copyAllBtn" class="hidden">Copy All Keys</button>
-        </div>
-
-        <p id="keyCountLabel">Number of keys:</p>
-        <button id="generateMoreBtn" class="hidden">Generate More Keys</button>
-        <p id="copyStatus" class="hidden">Keys copied to clipboard!</p>
-
+        
+        <input type="hidden" id="chatId" value="">
+        
         <div class="footer">
-            <p>Disclaimer: Please don't abuse it. Also, if you have any problems, change your IP address or change your VPN server and try again. 
-Tap the support button below if you have any issues</p>
+            Disclaimer: Please don't abuse it. Also, if you have any problems, change your IP address or change your VPN server and try again. Tap the support button below if you have any issues
             <button id="supportBtn">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -70,7 +61,6 @@ Tap the support button below if you have any issues</p>
             </button>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
