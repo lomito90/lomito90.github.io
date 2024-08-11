@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const EVENTS_DELAY = 20000;
+    const TELEGRAM_BOT_TOKEN = '7230408857:AAFiBAIdDBcyNg4-jNOwIVHaWKs11Venl4k';
 
     const games = {
         1: {
@@ -43,6 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const supportBtn = document.getElementById('supportBtn');
 
     startBtn.addEventListener('click', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get('chatId');
+
+        if (!chatId) {
+            alert('ChatId is missing. Please use a valid URL with chatId parameter.');
+            return;
+        }
+
         const gameChoice = parseInt(gameSelect.value);
         const keyCount = parseInt(keyCountSelect.value);
         const game = games[gameChoice];
@@ -106,38 +115,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const keys = await Promise.all(Array.from({ length: keyCount }, generateKeyProcess));
 
-        if (keys.length > 1) {
-            keysList.innerHTML = keys.filter(key => key).map(key =>
-                `<div class="key-item">
-                    <input type="text" value="${key}" readonly>
-                    <button class="copyKeyBtn" data-key="${key}">Copy Key</button>
-                </div>`
-            ).join('');
-            copyAllBtn.classList.remove('hidden');
-        } else if (keys.length === 1 && keys[0]) {
-            keysList.innerHTML =
-                `<div class="key-item">
-                    <input type="text" value="${keys[0]}" readonly>
-                    <button class="copyKeyBtn" data-key="${keys[0]}">Copy Key</button>
-                </div>`;
+        // Instead of displaying keys, send them via Telegram
+        if (keys.length > 0) {
+            const validKeys = keys.filter(key => key);
+            const message = `Generated keys for ${game.name}:\n\n${validKeys.join('\n')}`;
+            try {
+                await sendTelegramMessage(chatId, message);
+                progressLog.innerText = 'Keys sent via Telegram!';
+            } catch (error) {
+                progressLog.innerText = `Failed to send keys: ${error.message}`;
+            }
+        } else {
+            progressLog.innerText = 'Failed to generate keys.';
         }
-
-        keyContainer.classList.remove('hidden');
-        generatedKeysTitle.classList.remove('hidden');
-        document.querySelectorAll('.copyKeyBtn').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const key = event.target.getAttribute('data-key');
-                copyToClipboard(key);
-            });
-        });
-        copyAllBtn.addEventListener('click', () => {
-            const keysText = keys.filter(key => key).join('\n');
-            copyToClipboard(keysText);
-        });
 
         progressBar.style.width = '100%';
         progressText.innerText = '100%';
-        progressLog.innerText = 'Complete';
 
         generateMoreBtn.classList.remove('hidden');
         startBtn.disabled = false;
@@ -244,35 +237,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const delayRandom = () => Math.random() / 3 + 1;
 
-    const copyToClipboard = (text) => {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => {
-                showCopyStatus();
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-        } else {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
+    const sendTelegramMessage = async (chatId, text) => {
+        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: text,
+            }),
+        });
 
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showCopyStatus();
-                }
-            } catch (err) {
-                console.error('Fallback: Oops, unable to copy', err);
-            }
-
-            document.body.removeChild(textArea);
+        if (!response.ok) {
+            throw new Error('Failed to send Telegram message');
         }
-    };
 
-    const showCopyStatus = () => {
-        copyStatus.classList.remove('hidden');
-        setTimeout(() => copyStatus.classList.add('hidden'), 2000);
+        return await response.json();
     };
 });
