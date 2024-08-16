@@ -51,39 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const keyCountGroup = document.getElementById('keyCountGroup');
     const generateMoreBtn = document.getElementById('generateMoreBtn');
     const supportBtn = document.getElementById('supportBtn');
-    const uniqueUsersCount = document.getElementById('uniqueUsersCount');
-    const totalKeysGenerated = document.getElementById('totalKeysGenerated');
-
-    // Function to update statistics
-    const updateStatistics = () => {
-        let users = JSON.parse(localStorage.getItem('uniqueUsers')) || [];
-        let totalKeys = parseInt(localStorage.getItem('totalKeysGenerated')) || 0;
-
-        uniqueUsersCount.textContent = users.length;
-        totalKeysGenerated.textContent = totalKeys;
-    };
-
-    // Function to add a unique user
-    const addUniqueUser = (clientId) => {
-        let users = JSON.parse(localStorage.getItem('uniqueUsers')) || [];
-        if (!users.includes(clientId)) {
-            users.push(clientId);
-            localStorage.setItem('uniqueUsers', JSON.stringify(users));
-        }
-    };
-
-    // Function to increment total keys
-    const incrementTotalKeys = (count) => {
-        let totalKeys = parseInt(localStorage.getItem('totalKeysGenerated')) || 0;
-        totalKeys += count;
-        localStorage.setItem('totalKeysGenerated', totalKeys);
-    };
 
     startBtn.addEventListener('click', async () => {
         const gameChoice = parseInt(gameSelect.value);
         const keyCount = parseInt(keyCountSelect.value);
         const game = games[gameChoice];
 
+        // Hide the form sections
         gameSelectGroup.style.display = 'none';
         keyCountGroup.style.display = 'none';
 
@@ -112,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const generateKeyProcess = async () => {
             const clientId = generateClientId();
-            addUniqueUser(clientId);
             let clientToken;
             try {
                 clientToken = await login(clientId, game.appToken);
@@ -178,10 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         generateMoreBtn.classList.remove('hidden');
         startBtn.disabled = false;
-
-        // Update statistics
-        incrementTotalKeys(keys.filter(key => key).length);
-        updateStatistics();
     });
 
     generateMoreBtn.addEventListener('click', () => {
@@ -196,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         keysList.innerHTML = '';
         keyCountLabel.innerText = 'Number of keys:';
         
+        // Show the form sections again
         gameSelectGroup.style.display = 'block';
         keyCountGroup.style.display = 'block';
     });
@@ -315,7 +285,4 @@ document.addEventListener('DOMContentLoaded', () => {
         copyStatus.classList.remove('hidden');
         setTimeout(() => copyStatus.classList.add('hidden'), 2000);
     };
-
-    // Initial statistics update
-    updateStatistics();
 });
