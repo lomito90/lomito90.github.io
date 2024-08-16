@@ -58,21 +58,28 @@
         </div>
 
         <p id="keyCountLabel">Number of keys:</p>
+
         <button id="generateMoreBtn" class="hidden">Generate More Keys</button>
+
         <p id="copyStatus" class="hidden">Keys copied to clipboard!</p>
 
+        <!-- New statistics section -->
+        <div id="statisticsContainer" class="statistics-container">
+            <h3>Statistics</h3>
+            <p>Unique Users: <span id="uniqueUsersCount">0</span></p>
+            <p>Total Keys Generated: <span id="totalKeysGenerated">0</span></p>
+        </div>
+
         <div class="footer">
-            <p>Disclaimer: Please don't abuse it. Also, if you have any problems, change your IP address or change your VPN server and try again. 
-Tap the support button below if you have any issues</p>
+            <p>Disclaimer: Please don't abuse it. Also, if you have any problems, change your IP address or change your VPN server and try again. Tap the support button below if you have any issues</p>
             <button id="supportBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
                 Support
             </button>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
