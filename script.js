@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         6: {
             name: 'Twerk Race 3D',
             appToken: '61308365-9d16-4040-8bb0-2f4a4c69074c',
-            promoId: '61308365-9d16-4040-8bb0-2f4a4c69074c'
+            promoId: '61308365-9d16-4040-8bb0-2f4a4c69074c',
         }
     };
 
